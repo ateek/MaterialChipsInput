@@ -7,8 +7,6 @@ import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.os.Build;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -25,134 +23,137 @@ import com.pchmn.materialchips.util.ViewUtil;
 
 import java.util.List;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class FilterableListView extends RelativeLayout {
 
-    private static final String TAG = FilterableListView.class.toString();
-    private Context mContext;
-    // list
-    @BindView(R2.id.recycler_view) RecyclerView mRecyclerView;
-    private FilterableAdapter mAdapter;
-    private List<? extends ChipInterface> mFilterableList;
-    // others
-    private ChipsInput mChipsInput;
+  private static final String TAG = FilterableListView.class.toString();
+  private Context mContext;
+  // list
+  @BindView(R2.id.recycler_view)
+  RecyclerView mRecyclerView;
+  private FilterableAdapter mAdapter;
+  private List<? extends ChipInterface> mFilterableList;
+  // others
+  private ChipsInput mChipsInput;
 
-    public FilterableListView(Context context) {
-        super(context);
-        mContext = context;
-        init();
-    }
+  public FilterableListView(Context context) {
+    super(context);
+    mContext = context;
+    init();
+  }
 
-    private void init() {
-        // inflate layout
-        View view = inflate(getContext(), R.layout.list_filterable_view, this);
-        // butter knife
-        ButterKnife.bind(this, view);
+  private void init() {
+    // inflate layout
+    View view = inflate(getContext(), R.layout.list_filterable_view, this);
+    // butter knife
+    ButterKnife.bind(this, view);
 
-        // recycler
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
+    // recycler
+    mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext, RecyclerView.VERTICAL, false));
 
-        // hide on first
-        setVisibility(GONE);
-    }
+    // hide on first
+    setVisibility(GONE);
+  }
 
-    public void build(List<? extends ChipInterface> filterableList, ChipsInput chipsInput, ColorStateList backgroundColor, ColorStateList textColor) {
-        mFilterableList = filterableList;
-        mChipsInput = chipsInput;
+  public void build(List<? extends ChipInterface> filterableList, ChipsInput chipsInput, ColorStateList backgroundColor, ColorStateList textColor) {
+    mFilterableList = filterableList;
+    mChipsInput = chipsInput;
 
-        // adapter
-        mAdapter = new FilterableAdapter(mContext, mRecyclerView, filterableList, chipsInput, backgroundColor, textColor);
-        mRecyclerView.setAdapter(mAdapter);
-        if(backgroundColor != null)
-            mRecyclerView.getBackground().setColorFilter(backgroundColor.getDefaultColor(), PorterDuff.Mode.SRC_ATOP);
+    // adapter
+    mAdapter = new FilterableAdapter(mContext, mRecyclerView, filterableList, chipsInput, backgroundColor, textColor);
+    mRecyclerView.setAdapter(mAdapter);
+    if (backgroundColor != null)
+      mRecyclerView.getBackground().setColorFilter(backgroundColor.getDefaultColor(), PorterDuff.Mode.SRC_ATOP);
 
-        // listen to change in the tree
-        mChipsInput.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+    // listen to change in the tree
+    mChipsInput.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
-            @Override
-            public void onGlobalLayout() {
+      @Override
+      public void onGlobalLayout() {
 
-                // position
-                ViewGroup rootView = (ViewGroup) mChipsInput.getRootView();
+        // position
+        ViewGroup rootView = (ViewGroup) mChipsInput.getRootView();
 
-                // size
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                        ViewUtil.getWindowWidth(mContext),
-                        ViewGroup.LayoutParams.MATCH_PARENT);
+        // size
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewUtil.getWindowWidth(mContext),
+                ViewGroup.LayoutParams.MATCH_PARENT);
 
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
 
-                if(mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-                    layoutParams.bottomMargin = ViewUtil.getNavBarHeight(mContext);
-                }
+        if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+          layoutParams.bottomMargin = ViewUtil.getNavBarHeight(mContext);
+        }
 
 
-                // add view
-                rootView.addView(FilterableListView.this, layoutParams);
+        // add view
+        rootView.addView(FilterableListView.this, layoutParams);
 
-                // remove the listener:
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                    mChipsInput.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                } else {
-                    mChipsInput.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                }
-            }
+        // remove the listener:
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+          mChipsInput.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        } else {
+          mChipsInput.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+        }
+      }
 
-        });
-    }
+    });
+  }
 
-    public void filterList(CharSequence text) {
-        mAdapter.getFilter().filter(text, new Filter.FilterListener() {
-            @Override
-            public void onFilterComplete(int count) {
-                // show if there are results
-                if(mAdapter.getItemCount() > 0)
-                    fadeIn();
-                else
-                    fadeOut();
-            }
-        });
-    }
+  public void filterList(CharSequence text) {
+    mAdapter.getFilter().filter(text, new Filter.FilterListener() {
+      @Override
+      public void onFilterComplete(int count) {
+        // show if there are results
+        if (mAdapter.getItemCount() > 0)
+          fadeIn();
+        else
+          fadeOut();
+      }
+    });
+  }
 
-    /**
-     * Fade in
-     */
-    public void fadeIn() {
-        if(getVisibility() == VISIBLE)
-            return;
+  /**
+   * Fade in
+   */
+  public void fadeIn() {
+    if (getVisibility() == VISIBLE)
+      return;
 
-        // get visible window (keyboard shown)
-        final View rootView = getRootView();
-        Rect r = new Rect();
-        rootView.getWindowVisibleDisplayFrame(r);
+    // get visible window (keyboard shown)
+    final View rootView = getRootView();
+    Rect r = new Rect();
+    rootView.getWindowVisibleDisplayFrame(r);
 
-        int[] coord = new int[2];
-        mChipsInput.getLocationInWindow(coord);
-        ViewGroup.MarginLayoutParams layoutParams = (MarginLayoutParams) getLayoutParams();
-        layoutParams.topMargin = coord[1] + mChipsInput.getHeight();
-        // height of the keyboard
-        layoutParams.bottomMargin = rootView.getHeight() - r.bottom;
-        setLayoutParams(layoutParams);
+    int[] coord = new int[2];
+    mChipsInput.getLocationInWindow(coord);
+    ViewGroup.MarginLayoutParams layoutParams = (MarginLayoutParams) getLayoutParams();
+    layoutParams.topMargin = coord[1] + mChipsInput.getHeight();
+    // height of the keyboard
+    layoutParams.bottomMargin = rootView.getHeight() - r.bottom;
+    setLayoutParams(layoutParams);
 
-        AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
-        anim.setDuration(200);
-        startAnimation(anim);
-        setVisibility(VISIBLE);
-    }
+    AlphaAnimation anim = new AlphaAnimation(0.0f, 1.0f);
+    anim.setDuration(200);
+    startAnimation(anim);
+    setVisibility(VISIBLE);
+  }
 
-    /**
-     * Fade out
-     */
-    public void fadeOut() {
-        if(getVisibility() == GONE)
-            return;
+  /**
+   * Fade out
+   */
+  public void fadeOut() {
+    if (getVisibility() == GONE)
+      return;
 
-        AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
-        anim.setDuration(200);
-        startAnimation(anim);
-        setVisibility(GONE);
-    }
+    AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
+    anim.setDuration(200);
+    startAnimation(anim);
+    setVisibility(GONE);
+  }
 }
